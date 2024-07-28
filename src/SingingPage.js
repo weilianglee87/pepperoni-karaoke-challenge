@@ -33,9 +33,10 @@ const SingingPage = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const audioRef = useRef(null);
   const { transcript, resetTranscript } = useSpeechRecognition();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    if (audioRef.current) {
+    if (isPlaying) {
       const playAudio = () => {
         audioRef.current.audioEl.current.play();
         SpeechRecognition.startListening({
@@ -63,7 +64,7 @@ const SingingPage = () => {
 
       playAudio();
     }
-  }, [audioRef, navigate, playerName, currentWordIndex]);
+  }, [isPlaying, navigate, playerName, currentWordIndex]);
 
   useEffect(() => {
     const currentWord = lyrics[currentWordIndex];
@@ -73,6 +74,10 @@ const SingingPage = () => {
       resetTranscript();
     }
   }, [transcript, currentWordIndex, resetTranscript]);
+
+  const startGame = () => {
+    setIsPlaying(true);
+  };
 
   const pauseAudio = () => {
     if (audioRef.current) {
@@ -112,6 +117,9 @@ const SingingPage = () => {
           onError={(e) => console.error("Error loading audio:", e)}
         />
         <div className='buttons'>
+          <button onClick={startGame} className='start-button'>
+            Start Game
+          </button>
           <button onClick={pauseAudio} className='pause-button'>
             Pause
           </button>

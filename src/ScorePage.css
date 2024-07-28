@@ -1,0 +1,37 @@
+.score-page {
+  text-align: center;
+  padding: 20px;
+  background: url("/public/background.png") no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+}
+
+.score {
+  font-size: 100px;
+  margin: 20px 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.leaderboard-button,
+.play-again-button {
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.leaderboard-button {
+  background-color: #000;
+  color: #fff;
+}
+
+.play-again-button {
+  background-color: #fff;
+  color: #000;
+}

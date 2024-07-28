@@ -1,0 +1,78 @@
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: url("/public/background.png") no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  margin-top: 40px;
+}
+
+.button-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.instructions p,
+.start-challenge p {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.audio-player {
+  display: none; /* Hide the default audio player */
+}
+
+.listen-button,
+.ready-button {
+  background-color: #007bff;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2em;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.listen-button:hover {
+  background-color: #0056b3;
+}
+
+.ready-button {
+  background-color: white;
+  color: black;
+}
+
+.ready-button.ready {
+  background-color: #007bff;
+  color: white;
+}
+
+.ready-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

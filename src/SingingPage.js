@@ -91,9 +91,9 @@ const SingingPage = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [lyricsArray, setLyricsArray] = useState(lyrics);
   const audioRef = useRef(null);
-  const { transcript, resetTranscript } = useSpeechRecognition();
+  const { transcript, interimTranscript, resetTranscript } =
+    useSpeechRecognition();
   const [isPlaying, setIsPlaying] = useState(false);
-  const scoredWordsRef = useRef(new Set());
 
   const processTranscript = useCallback(
     debounce((transcript) => {
@@ -103,15 +103,14 @@ const SingingPage = () => {
       );
       if (
         currentWord &&
-        transformedTranscript.includes(currentWord.text.toLowerCase()) &&
-        !scoredWordsRef.current.has(currentWord.text)
+        transformedTranscript.includes(currentWord.text.toLowerCase())
       ) {
         console.log("Matched word:", currentWord.text); // Log the matched word
         setScore((prevScore) => prevScore + currentWord.score);
-        scoredWordsRef.current.add(currentWord.text);
+        setCurrentWordIndex((prevIndex) => prevIndex + 1);
         resetTranscript();
       }
-    }, 500), // Increased debounce delay
+    }, 100),
     [currentWordIndex, lyricsArray, resetTranscript]
   );
 
@@ -148,10 +147,10 @@ const SingingPage = () => {
   }, [isPlaying, navigate, playerName, currentWordIndex, lyricsArray]);
 
   useEffect(() => {
-    if (transcript) {
-      processTranscript(transcript);
+    if (transcript || interimTranscript) {
+      processTranscript(transcript || interimTranscript);
     }
-  }, [transcript, processTranscript]);
+  }, [transcript, interimTranscript, processTranscript]);
 
   const startGame = () => {
     setIsPlaying(true);

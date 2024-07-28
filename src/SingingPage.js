@@ -103,10 +103,8 @@ const SingingPage = () => {
 
   return (
     <div className='singing-page'>
-      <h2>Welcome, {playerName}</h2>
       <div className='score-display'>Your Score: {score}</div>
       <div className='content'>
-        <img src='/path-to-your-gif.gif' alt='Pepperoni Gif' className='gif' />
         <div className='lyrics-container'>
           {lyrics.map((word, index) => (
             <span
@@ -117,11 +115,7 @@ const SingingPage = () => {
             </span>
           ))}
         </div>
-        <audio
-          ref={audioRef}
-          src='/withoutsong.mp3'
-          className='audio-player'
-        ></audio>
+        <audio ref={audioRef} src='/song.mp3' className='audio-player'></audio>
         <div className='buttons'>
           <button onClick={pauseAudio} className='pause-button'>
             Pause

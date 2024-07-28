@@ -26,7 +26,6 @@ const SingingPage = () => {
   const navigate = useNavigate();
   const { playerName } = location.state || { playerName: "Player" };
   const [score, setScore] = useState(0);
-  const scoreRef = useRef(0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const audioRef = useRef(null);
   const [recognition, setRecognition] = useState(null);
@@ -49,12 +48,7 @@ const SingingPage = () => {
         console.log("Transcript:", transcript); // Log the transcript
         if (transcript.toLowerCase().includes(currentWord.text.toLowerCase())) {
           console.log("Matched word:", currentWord.text); // Log the matched word
-          setScore((prevScore) => {
-            const newScore = prevScore + currentWord.score;
-            scoreRef.current = newScore; // Update the ref value
-            console.log("Updated Score:", newScore); // Log the updated score
-            return newScore;
-          });
+          setScore((prevScore) => prevScore + currentWord.score);
         }
       };
 
@@ -64,35 +58,33 @@ const SingingPage = () => {
     }
   }, [currentWordIndex]);
 
-  const playAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.play();
-      recognition.start();
-      const intervalId = setInterval(() => {
-        const currentTime = audioRef.current.currentTime;
-        const newWordIndex = lyrics.findIndex(
-          (word, index) =>
-            currentTime >= word.time &&
-            currentTime < (lyrics[index + 1]?.time || Infinity)
-        );
-        if (newWordIndex !== -1 && newWordIndex !== currentWordIndex) {
-          setCurrentWordIndex(newWordIndex);
-        }
-      }, 100);
+  useEffect(() => {
+    if (audioRef.current && recognition) {
+      const playAudio = () => {
+        audioRef.current.play();
+        recognition.start();
+        const intervalId = setInterval(() => {
+          const currentTime = audioRef.current.currentTime;
+          const newWordIndex = lyrics.findIndex(
+            (word, index) =>
+              currentTime >= word.time &&
+              currentTime < (lyrics[index + 1]?.time || Infinity)
+          );
+          if (newWordIndex !== -1 && newWordIndex !== currentWordIndex) {
+            setCurrentWordIndex(newWordIndex);
+          }
+        }, 100);
 
-      audioRef.current.onended = () => {
-        clearInterval(intervalId);
-        recognition.stop();
-        console.log(
-          "Navigating to Score Page with score:",
-          scoreRef.current,
-          "and playerName:",
-          playerName
-        );
-        navigate("/score", { state: { score: scoreRef.current, playerName } });
+        audioRef.current.onended = () => {
+          clearInterval(intervalId);
+          recognition.stop();
+          navigate("/score", { state: { score, playerName } });
+        };
       };
+
+      playAudio();
     }
-  };
+  }, [recognition, audioRef]);
 
   const pauseAudio = () => {
     if (audioRef.current) {
@@ -125,11 +117,12 @@ const SingingPage = () => {
             </span>
           ))}
         </div>
-        <audio ref={audioRef} src='/song.mp3' className='audio-player'></audio>
+        <audio
+          ref={audioRef}
+          src='/withoutsong.mp3'
+          className='audio-player'
+        ></audio>
         <div className='buttons'>
-          <button onClick={playAudio} className='listen-again-button'>
-            Listen to Song Again
-          </button>
           <button onClick={pauseAudio} className='pause-button'>
             Pause
           </button>

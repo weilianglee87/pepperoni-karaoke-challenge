@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import ReactAudioPlayer from "react-audio-player";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -8,21 +7,21 @@ import "./SingingPage.css";
 
 // Updated lyrics with timestamps and scores
 const lyrics = [
-  { time: 7, text: "pepperoni", score: 4 },
-  { time: 8, text: "roni", score: 4 },
-  { time: 11, text: "pepperoni", score: 4 },
-  { time: 12, text: "roni", score: 4 },
-  { time: 13, text: "oh", score: 4 },
-  { time: 14, text: "domino’s", score: 4 },
-  { time: 15, text: "give me more", score: 4 },
-  { time: 16, text: "pepperoni", score: 4 },
-  { time: 23, text: "one hundred", score: 4 },
-  { time: 24, text: "fifty percent", score: 4 },
-  { time: 26, text: "more pepperoni", score: 4 },
-  { time: 27, text: "roni", score: 4 },
-  { time: 28, text: "with a mozzarella", score: 4 },
-  { time: 30, text: "twisty", score: 4 },
-  { time: 31, text: "crust", score: 4 },
+  { time: 7, text: "pepperoni", score: 5 },
+  { time: 8, text: "roni", score: 5 },
+  { time: 11, text: "pepperoni", score: 5 },
+  { time: 12, text: "roni", score: 5 },
+  { time: 13, text: "oh", score: 5 },
+  { time: 14, text: "domino’s", score: 5 },
+  { time: 15, text: "give me more", score: 5 },
+  { time: 16, text: "pepperoni", score: 5 },
+  { time: 23, text: "one hundred", score: 5 },
+  { time: 24, text: "fifty percent", score: 5 },
+  { time: 26, text: "more pepperoni", score: 5 },
+  { time: 27, text: "roni", score: 5 },
+  { time: 28, text: "with a mozzarella", score: 5 },
+  { time: 30, text: "twisty", score: 5 },
+  { time: 31, text: "crust", score: 5 },
 ];
 
 const SingingPage = () => {
@@ -36,15 +35,16 @@ const SingingPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && audioRef.current) {
       const playAudio = () => {
-        audioRef.current.audioEl.current.play();
+        const audioElement = audioRef.current;
+        audioElement.play();
         SpeechRecognition.startListening({
           continuous: true,
           language: "en-US",
         });
         const intervalId = setInterval(() => {
-          const currentTime = audioRef.current.audioEl.current.currentTime;
+          const currentTime = audioElement.currentTime;
           const newWordIndex = lyrics.findIndex(
             (word, index) =>
               currentTime >= word.time &&
@@ -55,7 +55,7 @@ const SingingPage = () => {
           }
         }, 100);
 
-        audioRef.current.audioEl.current.onended = () => {
+        audioElement.onended = () => {
           clearInterval(intervalId);
           SpeechRecognition.stopListening();
           navigate("/score", { state: { score, playerName } });
@@ -81,7 +81,8 @@ const SingingPage = () => {
 
   const pauseAudio = () => {
     if (audioRef.current) {
-      audioRef.current.audioEl.current.pause();
+      const audioElement = audioRef.current;
+      audioElement.pause();
       SpeechRecognition.stopListening();
     }
   };
@@ -110,7 +111,7 @@ const SingingPage = () => {
             </span>
           ))}
         </div>
-        <ReactAudioPlayer
+        <audio
           ref={audioRef}
           src='/song.mp3'
           className='audio-player'

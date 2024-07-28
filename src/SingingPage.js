@@ -7,22 +7,80 @@ import "./SingingPage.css";
 
 // Updated lyrics with timestamps and scores
 const lyrics = [
-  { time: 7, text: "pepperoni", score: 5 },
-  { time: 8, text: "roni", score: 5 },
-  { time: 11, text: "pepperoni", score: 5 },
-  { time: 12, text: "roni", score: 5 },
-  { time: 13, text: "oh", score: 5 },
-  { time: 14, text: "domino’s", score: 5 },
-  { time: 15, text: "give me more", score: 5 },
-  { time: 16, text: "pepperoni", score: 5 },
-  { time: 23, text: "one hundred", score: 5 },
-  { time: 24, text: "fifty percent", score: 5 },
-  { time: 26, text: "more pepperoni", score: 5 },
-  { time: 27, text: "roni", score: 5 },
-  { time: 28, text: "with a mozzarella", score: 5 },
-  { time: 30, text: "twisty", score: 5 },
-  { time: 31, text: "crust", score: 5 },
+  { time: 7, text: "pepperoni", score: 10 },
+  { time: 8, text: "roni", score: 10 },
+  { time: 11, text: "pepperoni", score: 10 },
+  { time: 12, text: "roni", score: 10 },
+  { time: 13, text: "oh", score: 10 },
+  { time: 14, text: "domino’s", score: 10 },
+  { time: 15, text: "give", score: 10 },
+  { time: 15.5, text: "me", score: 10 },
+  { time: 16, text: "more", score: 10 },
+  { time: 23, text: "one", score: 10 },
+  { time: 23.5, text: "hundred", score: 10 },
+  { time: 24, text: "fifty", score: 10 },
+  { time: 24.5, text: "percent", score: 10 },
+  { time: 26, text: "more", score: 10 },
+  { time: 26.5, text: "pepperoni", score: 10 },
+  { time: 27, text: "roni", score: 10 },
+  { time: 28, text: "with", score: 10 },
+  { time: 28.5, text: "a", score: 10 },
+  { time: 29, text: "mozzarella", score: 10 },
+  { time: 30, text: "twisty", score: 10 },
+  { time: 31, text: "crust", score: 10 },
 ];
+
+const numberToWords = (num) => {
+  const a = [
+    "",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+  ];
+  const b = [
+    "",
+    "",
+    "twenty",
+    "thirty",
+    "forty",
+    "fifty",
+    "sixty",
+    "seventy",
+    "eighty",
+    "ninety",
+  ];
+
+  if (num < 20) return a[num];
+  if (num < 100)
+    return b[Math.floor(num / 10)] + (num % 10 ? " " + a[num % 10] : "");
+  if (num < 1000)
+    return (
+      a[Math.floor(num / 100)] +
+      " hundred" +
+      (num % 100 ? " " + numberToWords(num % 100) : "")
+    );
+  return num;
+};
+
+const replaceNumbersWithWords = (text) => {
+  return text.replace(/\d+/g, (match) => numberToWords(parseInt(match)));
+};
 
 const SingingPage = () => {
   const location = useLocation();
@@ -68,8 +126,10 @@ const SingingPage = () => {
 
   useEffect(() => {
     const currentWord = lyrics[currentWordIndex];
-    if (transcript.toLowerCase().includes(currentWord.text.toLowerCase())) {
-      console.log("Matched word:", currentWord.text); // Log the matched word
+    const transformedTranscript = replaceNumbersWithWords(
+      transcript.toLowerCase()
+    );
+    if (transformedTranscript.includes(currentWord.text.toLowerCase())) {
       setScore((prevScore) => prevScore + currentWord.score);
       resetTranscript();
     }
@@ -97,7 +157,6 @@ const SingingPage = () => {
 
   return (
     <div className='singing-page'>
-      <h2>Welcome, {playerName}</h2>
       <div className='score-display'>Your Score: {score}</div>
       <div className='content'>
         <img src='/path-to-your-gif.gif' alt='Pepperoni Gif' className='gif' />

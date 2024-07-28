@@ -1,8 +1,9 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import { debounce } from "lodash";
 import "./SingingPage.css";
 
 // Updated lyrics with timestamps and scores
@@ -93,6 +94,27 @@ const SingingPage = () => {
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const processTranscript = useCallback(
+    debounce((transcript) => {
+      const currentWord = lyricsArray[currentWordIndex];
+      const transformedTranscript = replaceNumbersWithWords(
+        transcript.toLowerCase()
+      );
+      if (
+        currentWord &&
+        transformedTranscript.includes(currentWord.text.toLowerCase())
+      ) {
+        console.log("Matched word:", currentWord.text); // Log the matched word
+        setScore((prevScore) => prevScore + currentWord.score);
+        setLyricsArray((prevLyrics) =>
+          prevLyrics.filter((_, index) => index !== currentWordIndex)
+        );
+        resetTranscript();
+      }
+    }, 300),
+    [currentWordIndex, lyricsArray, resetTranscript]
+  );
+
   useEffect(() => {
     if (isPlaying && audioRef.current) {
       const playAudio = () => {
@@ -126,19 +148,10 @@ const SingingPage = () => {
   }, [isPlaying, navigate, playerName, currentWordIndex, lyricsArray]);
 
   useEffect(() => {
-    const currentWord = lyricsArray[currentWordIndex];
-    const transformedTranscript = replaceNumbersWithWords(
-      transcript.toLowerCase()
-    );
-    if (transformedTranscript.includes(currentWord.text.toLowerCase())) {
-      console.log("Matched word:", currentWord.text); // Log the matched word
-      setScore((prevScore) => prevScore + currentWord.score);
-      setLyricsArray((prevLyrics) =>
-        prevLyrics.filter((_, index) => index !== currentWordIndex)
-      );
-      resetTranscript();
+    if (transcript) {
+      processTranscript(transcript);
     }
-  }, [transcript, currentWordIndex, resetTranscript, lyricsArray]);
+  }, [transcript, processTranscript]);
 
   const startGame = () => {
     setIsPlaying(true);

@@ -1,5 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import ReactAudioPlayer from "react-audio-player";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import "./SingingPage.css";
 
 // Updated lyrics with timestamps and scores
@@ -28,43 +32,18 @@ const SingingPage = () => {
   const [score, setScore] = useState(0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const audioRef = useRef(null);
-  const [recognition, setRecognition] = useState(null);
+  const { transcript, resetTranscript } = useSpeechRecognition();
 
   useEffect(() => {
-    if ("webkitSpeechRecognition" in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition;
-      const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = true;
-      recognitionInstance.interimResults = true;
-      recognitionInstance.lang = "en-US";
-
-      recognitionInstance.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0])
-          .map((result) => result.transcript)
-          .join("");
-
-        const currentWord = lyrics[currentWordIndex];
-        console.log("Transcript:", transcript); // Log the transcript
-        if (transcript.toLowerCase().includes(currentWord.text.toLowerCase())) {
-          console.log("Matched word:", currentWord.text); // Log the matched word
-          setScore((prevScore) => prevScore + currentWord.score);
-        }
-      };
-
-      setRecognition(recognitionInstance);
-    } else {
-      alert("Speech recognition not supported in this browser.");
-    }
-  }, [currentWordIndex]);
-
-  useEffect(() => {
-    if (audioRef.current && recognition) {
+    if (audioRef.current) {
       const playAudio = () => {
-        audioRef.current.play();
-        recognition.start();
+        audioRef.current.audioEl.current.play();
+        SpeechRecognition.startListening({
+          continuous: true,
+          language: "en-US",
+        });
         const intervalId = setInterval(() => {
-          const currentTime = audioRef.current.currentTime;
+          const currentTime = audioRef.current.audioEl.current.currentTime;
           const newWordIndex = lyrics.findIndex(
             (word, index) =>
               currentTime >= word.time &&
@@ -75,21 +54,30 @@ const SingingPage = () => {
           }
         }, 100);
 
-        audioRef.current.onended = () => {
+        audioRef.current.audioEl.current.onended = () => {
           clearInterval(intervalId);
-          recognition.stop();
+          SpeechRecognition.stopListening();
           navigate("/score", { state: { score, playerName } });
         };
       };
 
       playAudio();
     }
-  }, [recognition, audioRef]);
+  }, [audioRef, navigate, playerName, currentWordIndex]);
+
+  useEffect(() => {
+    const currentWord = lyrics[currentWordIndex];
+    if (transcript.toLowerCase().includes(currentWord.text.toLowerCase())) {
+      console.log("Matched word:", currentWord.text); // Log the matched word
+      setScore((prevScore) => prevScore + currentWord.score);
+      resetTranscript();
+    }
+  }, [transcript, currentWordIndex, resetTranscript]);
 
   const pauseAudio = () => {
     if (audioRef.current) {
-      audioRef.current.pause();
-      recognition.stop();
+      audioRef.current.audioEl.current.pause();
+      SpeechRecognition.stopListening();
     }
   };
 
@@ -103,8 +91,10 @@ const SingingPage = () => {
 
   return (
     <div className='singing-page'>
+      <h2>Welcome, {playerName}</h2>
       <div className='score-display'>Your Score: {score}</div>
       <div className='content'>
+        <img src='/path-to-your-gif.gif' alt='Pepperoni Gif' className='gif' />
         <div className='lyrics-container'>
           {lyrics.map((word, index) => (
             <span
@@ -115,7 +105,12 @@ const SingingPage = () => {
             </span>
           ))}
         </div>
-        <audio ref={audioRef} src='/song.mp3' className='audio-player'></audio>
+        <ReactAudioPlayer
+          ref={audioRef}
+          src='/song.mp3'
+          className='audio-player'
+          onError={(e) => console.error("Error loading audio:", e)}
+        />
         <div className='buttons'>
           <button onClick={pauseAudio} className='pause-button'>
             Pause

@@ -88,6 +88,7 @@ const SingingPage = () => {
   const { playerName } = location.state || { playerName: "Player" };
   const [score, setScore] = useState(0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [lyricsArray, setLyricsArray] = useState(lyrics);
   const audioRef = useRef(null);
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -103,10 +104,10 @@ const SingingPage = () => {
         });
         const intervalId = setInterval(() => {
           const currentTime = audioElement.currentTime;
-          const newWordIndex = lyrics.findIndex(
+          const newWordIndex = lyricsArray.findIndex(
             (word, index) =>
               currentTime >= word.time &&
-              currentTime < (lyrics[index + 1]?.time || Infinity)
+              currentTime < (lyricsArray[index + 1]?.time || Infinity)
           );
           if (newWordIndex !== -1 && newWordIndex !== currentWordIndex) {
             setCurrentWordIndex(newWordIndex);
@@ -122,18 +123,22 @@ const SingingPage = () => {
 
       playAudio();
     }
-  }, [isPlaying, navigate, playerName, currentWordIndex]);
+  }, [isPlaying, navigate, playerName, currentWordIndex, lyricsArray]);
 
   useEffect(() => {
-    const currentWord = lyrics[currentWordIndex];
+    const currentWord = lyricsArray[currentWordIndex];
     const transformedTranscript = replaceNumbersWithWords(
       transcript.toLowerCase()
     );
     if (transformedTranscript.includes(currentWord.text.toLowerCase())) {
+      console.log("Matched word:", currentWord.text); // Log the matched word
       setScore((prevScore) => prevScore + currentWord.score);
+      setLyricsArray((prevLyrics) =>
+        prevLyrics.filter((_, index) => index !== currentWordIndex)
+      );
       resetTranscript();
     }
-  }, [transcript, currentWordIndex, resetTranscript]);
+  }, [transcript, currentWordIndex, resetTranscript, lyricsArray]);
 
   const startGame = () => {
     setIsPlaying(true);
@@ -157,11 +162,12 @@ const SingingPage = () => {
 
   return (
     <div className='singing-page'>
+      <h2>Welcome, {playerName}</h2>
       <div className='score-display'>Your Score: {score}</div>
       <div className='content'>
         <img src='/path-to-your-gif.gif' alt='Pepperoni Gif' className='gif' />
         <div className='lyrics-container'>
-          {lyrics.map((word, index) => (
+          {lyricsArray.map((word, index) => (
             <span
               key={index}
               className={`word ${index <= currentWordIndex ? "highlight" : ""}`}

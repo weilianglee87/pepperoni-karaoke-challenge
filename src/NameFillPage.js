@@ -8,7 +8,7 @@ const NameFillPage = () => {
 
   const handleSubmit = () => {
     if (name.trim()) {
-      navigate("/singing", { state: { playerName: name } });
+      navigate("/scoring", { state: { playerName: name } });
     }
   };
 

@@ -93,6 +93,7 @@ const SingingPage = () => {
   const audioRef = useRef(null);
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [isPlaying, setIsPlaying] = useState(false);
+  const scoredWordsRef = useRef(new Set());
 
   const processTranscript = useCallback(
     debounce((transcript) => {
@@ -102,16 +103,15 @@ const SingingPage = () => {
       );
       if (
         currentWord &&
-        transformedTranscript.includes(currentWord.text.toLowerCase())
+        transformedTranscript.includes(currentWord.text.toLowerCase()) &&
+        !scoredWordsRef.current.has(currentWord.text)
       ) {
         console.log("Matched word:", currentWord.text); // Log the matched word
         setScore((prevScore) => prevScore + currentWord.score);
-        setLyricsArray((prevLyrics) =>
-          prevLyrics.filter((_, index) => index !== currentWordIndex)
-        );
+        scoredWordsRef.current.add(currentWord.text);
         resetTranscript();
       }
-    }, 300),
+    }, 500), // Increased debounce delay
     [currentWordIndex, lyricsArray, resetTranscript]
   );
 
